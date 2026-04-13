@@ -1,0 +1,107 @@
+# 训练配置文件
+# 包含训练超参数、优化器设置
+
+# 训练基本配置
+training:
+  batch_size: 4
+  epochs: 50
+  early_stopping_patience: 10
+  early_stopping_min_delta: 0.001
+  save_checkpoint_epochs: 1
+  checkpoint_dir: "checkpoints"
+  best_model_metric: "f1_score"
+  best_model_mode: "max"  # "max" or "min"
+  quick_run_epochs: 0
+  quick_run_steps: 0
+  validation:
+    val_batch_size: 4
+    val_interval: 1  # Epochs
+  
+  # 训练模式
+  mode: "train"  # "train", "finetune", "continue"
+  
+  # 微调特定模块
+  finetune:
+    enable: false
+    modules: ["llm", "relation_head"]  # 要微调的模块
+    
+  # 数据加载
+  data_loader:
+    shuffle: true
+    num_workers: 2  # Per GPU
+    pin_memory: true
+    persistent_workers: false  # Must be false if num_workers is 0
+    prefetch_factor: null  # Must be null if num_workers is 0
+
+# 优化器配置
+optimizer:
+  type: "adamw"  # "adam", "adamw", "sgd", "rmsprop"
+  lr: 1e-4
+  weight_decay: 1e-5
+  betas:
+    - 0.9
+    - 0.999
+  eps: 1e-8
+  momentum: 0.9
+
+# 学习率调度
+lr_scheduler:
+  type: "cosine_annealing"  # "step", "cosine_annealing", "reduce_on_plateau", "exponential"
+  warmup_steps: 1000
+  warmup_ratio: 0.1
+  
+  # step scheduler
+  step_size: 30
+  gamma: 0.1
+  
+  # cosine annealing
+  T_max: 100
+  eta_min: 1e-7
+  
+  # reduce on plateau
+  patience: 10
+  factor: 0.5
+  min_lr: 1e-7
+  threshold: 0.001
+
+# 损失函数
+loss:
+  type: "bce"  # 对于多标签 PPI 任务，必须使用二元交叉熵 (BCE)
+  
+  # focal loss
+  alpha: 0.25
+  gamma: 2.0
+  
+  # 权重
+  class_weights: null
+
+# 回调函数
+callbacks:
+  model_checkpoint: true
+  early_stopping: true
+  tensorboard_logger: true
+  lr_scheduler: true
+  progress_bar: true
+  
+  # 模型检查点回调
+  checkpoint:
+    save_top_k: 3
+    monitor: "val_f1_score"
+    mode: "max"
+    save_last: true
+    save_weights_only: false
+    filename: "model-{epoch:03d}-{val_f1_score:.4f}"
+
+# 分布式训练
+distributed:
+  use_distributed: true
+  backend: "nccl"
+  world_size: 8
+  rank: 0
+  dist_url: "tcp://localhost:23456"
+
+# 混合精度训练
+amp:
+  use_amp: true
+  dtype: "float16"  # "float16", "bfloat16"
+  loss_scale: "dynamic"

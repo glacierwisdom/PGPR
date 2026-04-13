@@ -1,0 +1,56 @@
+# BFS + blastp 相似度映射 + 30min 训练 + 全量测试
+paths:
+  checkpoints_dir: "artifacts/checkpoints/bfs_blastp_30min"
+  results_dir: "artifacts/metrics/bfs_blastp_30min"
+
+dataset:
+  train_file: "data/shs27k_llapa/processed/bfs_train.tsv"
+  val_file: "data/shs27k_llapa/processed/bfs_val.tsv"
+  test_file: "data/shs27k_llapa/processed/bfs_test.tsv"
+
+training:
+  batch_size: 4
+  epochs: 1
+  quick_run_epochs: 0
+  quick_run_steps: 200
+  validate: false
+  data_loader:
+    num_workers: 2
+
+callbacks:
+  tensorboard_logger: false
+  early_stopping: false
+  model_checkpoint: true
+  checkpoint:
+    dir: "artifacts/checkpoints/bfs_blastp_30min"
+    monitor: "loss"
+    mode: "min"
+    save_best_only: true
+    save_freq: 1
+    save_weights_only: false
+    max_save_files: 2
+
+distributed:
+  use_distributed: true
+  backend: "nccl"
+  world_size: 4
+
+evaluation:
+  batch_size: 8
+
+reinforcement_learning:
+  batch_size: 1000000
+  epochs: 1
+
+llm:
+  model_name: "models/llm/llama-3.2-3b-instruct"
+
+preprocessing:
+  similarity_mapping:
+    enabled: true
+    method: "blastp"
+    allow_fallback_to_esm: false
+    blastp_evalue: 1e-5
+    blastp_num_threads: 8
+    batch_size: 16
+    cache_dir: "artifacts/cache/protein_similarity_mapper_blastp"

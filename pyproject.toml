@@ -1,0 +1,70 @@
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+/(\.
+    |build
+    |dist
+    |venv
+    |docs
+    |data
+    |analysis
+    |experiments
+)/
+'''
+
+[tool.isort]
+profile = "black"
+filter_files = true
+line_length = 88
+skip_glob = ["*/venv/*", "*/build/*", "*/dist/*", "*/docs/*", "*/data/*", "*/analysis/*", "*/experiments/*"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_untyped_decorators = true
+explicit_package_bases = true
+warn_incomplete_stub = true
+exclude = "(^\\.venv/|^venv/|^data/|^output/|^logs/|^results/|^models/llm/|^tools/|^evaluation_results/|^\\.git/)"
+
+# 忽略某些目录
+ignore_missing_imports = true
+follow_imports = "silent"
+
+[tool.flake8]
+max-line-length = 88
+ignore = ["E203", "W503"]
+select = ["E", "F", "W", "C90"]
+exclude = [
+    "__pycache__",
+    "venv",
+    ".venv",
+    "build",
+    "dist",
+    "docs",
+    "data",
+    "analysis",
+    "experiments",
+    "logs",
+    "output",
+    "results",
+    "tools",
+    "models/llm",
+    "evaluation_results",
+    ".git",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+log_cli = true
+log_cli_level = "INFO"

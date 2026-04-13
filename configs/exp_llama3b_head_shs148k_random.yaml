@@ -1,0 +1,66 @@
+paths:
+  processed_data_dir: "data/shs148k_llapa/processed"
+  checkpoints_dir: "artifacts/checkpoints/shs148k_llama3b_head_random"
+  results_dir: "artifacts/metrics/shs148k_llama3b_head_random"
+
+dataset:
+  name: "shs148k"
+  train_file: "data/shs148k_llapa/processed/random_train.tsv"
+  val_file: "data/shs148k_llapa/processed/random_val.tsv"
+  test_file: "data/shs148k_llapa/processed/random_test.tsv"
+  protein_info_file: "protein_info.csv"
+
+training:
+  batch_size: 4
+  validate: true
+  data_loader:
+    num_workers: 2
+    pin_memory: true
+
+callbacks:
+  model_checkpoint: true
+  early_stopping: true
+  tensorboard_logger: true
+  tensorboard:
+    comment: "-shs148k-random"
+  checkpoint:
+    dir: "artifacts/checkpoints/shs148k_llama3b_head_random"
+    monitor: "val_f1_score"
+    mode: "max"
+    save_best_only: true
+    save_freq: 1
+    save_weights_only: false
+    max_save_files: 3
+
+distributed:
+  use_distributed: true
+  backend: "nccl"
+  world_size: 8
+  master_port: 23580
+
+preprocessing:
+  similarity_mapping:
+    enabled: true
+    method: "blastp"
+    allow_fallback_to_esm: true
+    blastp_evalue: 1e-5
+    blastp_num_threads: 16
+    batch_size: 16
+    cache_dir: "artifacts/cache/protein_similarity_mapper_blastp/shs148k_random"
+    blastp_timeout_seconds: 60
+
+llm:
+  train_llm: true
+  output_mode: "relation_head"
+  train_backbone: false
+  log_inputs: false
+  gradient_checkpointing: false
+  max_length: 512
+
+reinforcement_learning:
+  enabled: true
+  update_every_steps: 20
+  loss_reward_weight: 1.0
+
+evaluation:
+  batch_size: 32

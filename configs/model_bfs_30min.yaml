@@ -1,0 +1,9 @@
+# 30min BFS 实验用的轻量 LLM 设置
+llm:
+  model_name: "models/llm/llama-3.2-3b-instruct"
+  max_length: 512
+  lora:
+    use_lora: false
+  quantization:
+    load_in_8bit: false
+  gradient_checkpointing: true

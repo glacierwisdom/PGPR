@@ -1,0 +1,57 @@
+paths:
+  checkpoints_dir: "artifacts/checkpoints/llama3b_head_dfs"
+  results_dir: "artifacts/metrics/llama3b_head_dfs"
+
+dataset:
+  name: "shs27k"
+  train_file: "data/shs27k_llapa/processed/dfs_train.tsv"
+  val_file: "data/shs27k_llapa/processed/dfs_val.tsv"
+  test_file: "data/shs27k_llapa/processed/dfs_test.tsv"
+  protein_info_file: "protein_info.csv"
+
+training:
+  batch_size: 4
+  epochs: 10
+  validate: true
+  data_loader:
+    num_workers: 0
+    pin_memory: false
+
+callbacks:
+  model_checkpoint: true
+  early_stopping: false
+  tensorboard_logger: true
+  checkpoint:
+    dir: "artifacts/checkpoints/llama3b_head_dfs"
+    monitor: "val_f1_score"
+    mode: "max"
+    save_best_only: true
+    save_freq: 1
+    save_weights_only: false
+    max_save_files: 3
+
+distributed:
+  use_distributed: true
+  backend: "nccl"
+  world_size: 8
+  master_port: 23472
+
+preprocessing:
+  similarity_mapping:
+    enabled: true
+    method: "blastp"
+    allow_fallback_to_esm: false
+    blastp_evalue: 1e-5
+    blastp_num_threads: 8
+    batch_size: 16
+    cache_dir: "artifacts/cache/protein_similarity_mapper_blastp"
+    blastp_timeout_seconds: 30
+
+llm:
+  train_llm: true
+  output_mode: "relation_head"
+  train_backbone: false
+  log_inputs: false
+
+evaluation:
+  batch_size: 16

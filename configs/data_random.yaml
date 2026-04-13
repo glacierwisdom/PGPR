@@ -1,0 +1,7 @@
+# Random 数据集配置（SHS27k）
+dataset:
+  name: "shs27k"
+  train_file: "data/shs27k_llapa/processed/random_train.tsv"
+  val_file: "data/shs27k_llapa/processed/random_val.tsv"
+  test_file: "data/shs27k_llapa/processed/random_test.tsv"
+  protein_info_file: "protein_info.csv"

@@ -1,0 +1,137 @@
+# 模型配置文件
+# 包含所有模型架构参数
+
+# GNN_PPI模型配置
+gnn_ppi:
+  # 节点表征提取器
+  node_representation:
+    feature_dim: 320  # ESM-2特征维度
+    hidden_dim: 512
+    output_dim: 256
+    dropout: 0.1
+    num_layers: 3
+    activation: "gelu"
+    batch_norm: true
+    residual: true
+    use_layer_norm: true
+  
+  # 目标条件化注意力机制
+  target_attention:
+    num_heads: 8
+    hidden_dim: 256
+    dropout: 0.1
+    num_layers: 2
+    attention_dropout: 0.1
+    use_positional_encoding: false
+  
+  # 图注意力网络
+  graph_attention:
+    num_layers: 4
+    hidden_dim: 256
+    num_heads: 8
+    dropout: 0.1
+    attention_dropout: 0.1
+    use_residual: true
+    use_layer_norm: true
+  
+  # 相似性匹配模块
+  similarity_matcher:
+    input_dim: 256
+    hidden_dim: 128
+    output_dim: 64
+    similarity_type: "cosine"  # "cosine", "dot", "mlp"
+    use_attention: true
+  
+  # 蛋白质关系预测头
+  relation_head:
+    input_dim: 256
+    hidden_dim: 128
+    output_dim: 7  # 关系类型数量 (SHS27k)
+    dropout: 0.2
+
+# 通用模型配置
+model:
+  num_chains: 3
+  num_relations: 7
+  num_edge_relations: 7
+  num_node_features: 320
+  num_edge_features: 64
+  embedding_dim: 256
+  hidden_dim: 128
+  rnn_history_dim: 128
+  rnn_hidden_dim: 128
+  rnn_type: "lstm"
+  bidirectional: false
+  max_steps: 10
+  use_batch_norm: true
+  activation: "gelu"
+  use_softmax: true
+
+# LLM配置
+llm:
+  model_name: "models/llm/llama-3.2-3b-instruct"
+  num_relations: 7
+  output_mode: "relation_head"
+  max_length: 1024
+  temperature: 0.1
+  top_p: 0.9
+  top_k: 50
+  do_sample: false
+  num_return_sequences: 1
+  device: "cuda"
+  
+  # LoRA配置
+  lora:
+    use_lora: true
+    r: 16
+    lora_alpha: 32
+    lora_dropout: 0.1
+    target_modules: ["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  
+  # 量化配置
+  quantization:
+    use_quantization: true
+    load_in_8bit: false
+    load_in_4bit: true
+    bnb_4bit_compute_dtype: "float16"
+    bnb_4bit_quant_type: "nf4"
+
+# 强化学习配置
+rl:
+  # PPO算法配置
+  ppo:
+    clip_ratio: 0.2
+    ent_coef: 0.01
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    gamma: 0.99
+    lam: 0.95
+    num_epochs: 4
+    minibatch_size: 128
+    value_loss_coef: 0.5
+    entropy_loss_coef: 0.01
+    
+  # 经验回放缓冲区
+  buffer:
+    capacity: 10000
+    batch_size: 128
+  
+  # 探索策略
+  exploration:
+    initial_epsilon: 0.1
+    final_epsilon: 0.01
+    decay_steps: 10000
+    max_steps: 5
+    use_epsilon_greedy: true
+    use_top_k: true
+    top_k: 3
+
+# 多尺度奖励计算器
+reward:
+  accuracy_weight: 1.0
+  path_length_weight: 0.2
+  exploration_diversity_weight: 0.3
+  target_relevance_weight: 0.5
+  edge_feature_rationality_weight: 0.3
+  use_discounted_rewards: true
+  discount_factor: 0.9

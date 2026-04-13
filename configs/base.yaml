@@ -1,0 +1,36 @@
+# 基础配置文件
+# 包含路径、设备、日志等基础设置
+
+# 路径配置
+paths:
+  project_root: "."
+  data_dir: "data"
+  processed_data_dir: "data/shs27k_llapa/processed"
+  models_dir: "models"
+  artifacts_dir: "artifacts"
+  logs_dir: "artifacts/logs"
+  checkpoints_dir: "artifacts/checkpoints"
+  results_dir: "artifacts/metrics"
+  eval_detailed_dir: "artifacts/eval_detailed"
+  cache_dir: "artifacts/cache"
+  benchmarks_dir: "artifacts/benchmarks"
+
+# 设备配置
+device:
+  device_type: "cuda"  # "cuda" or "cpu"
+  num_gpus: 1
+  mixed_precision: true
+  device_ids: [0]  # GPU设备ID列表
+
+# 日志配置
+logging:
+  level: "INFO"  # "DEBUG", "INFO", "WARNING", "ERROR"
+  log_file: "artifacts/logs/app.log"
+  max_log_size: 10  # MB
+  backup_count: 5
+
+# 随机种子
+seed:
+  random_seed: 42
+  torch_seed: 42
+  numpy_seed: 42

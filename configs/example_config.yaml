@@ -1,0 +1,135 @@
+# GAPNPPI 示例配置文件
+# 该文件展示了如何配置GAPNPPI模型的完整参数
+
+# 基础配置
+base:
+  seed: 42
+  device: "cuda:0"  # 或 "cpu"
+  log_dir: "logs/example_run"
+  checkpoint_dir: "checkpoints/example_run"
+  max_workers: 4
+
+# 数据配置
+data:
+  raw_data_path: "data/raw/PPI_data.txt"
+  processed_data_path: "data/processed/ppi_dataset.pt"
+  embeddings_path: "data/embeddings/esm2_t36_3B_UR50D"
+  
+  # 数据预处理参数
+  preprocessing:
+    min_sequence_length: 50
+    max_sequence_length: 1000
+    filter_identity_threshold: 0.3
+    normalize_features: true
+    
+  # 数据集分割参数
+  split:
+    train_ratio: 0.7
+    val_ratio: 0.15
+    test_ratio: 0.15
+    stratified: true
+
+# 模型配置
+model:
+  # ESM编码器配置
+  esm_encoder:
+    model_name: "facebook/esm2_t36_3B_UR50D"
+    pooling_strategy: "mean"  # mean, max, cls
+    embedding_dim: 1280
+    freeze_encoder: true
+    use_cache: true
+    
+  # GNN配置
+  gnn:
+    model_type: "GAT"
+    hidden_dim: 256
+    num_layers: 3
+    heads: 4
+    dropout: 0.2
+    activation: "gelu"
+    batch_norm: true
+    residual: true
+    
+  # COT生成器配置
+  cot_generator:
+    enabled: true
+    model_name: "facebook/esm2_t36_3B_UR50D"
+    max_length: 512
+    temperature: 0.7
+    top_k: 50
+    top_p: 0.95
+
+# 训练配置
+training:
+  # 优化器配置
+  optimizer:
+    type: "adamw"
+    lr: 1e-4
+    weight_decay: 0.01
+    betas: [0.9, 0.999]
+    
+  # 学习率调度器配置
+  scheduler:
+    type: "cosineannealinglr"
+    T_max: 100
+    eta_min: 1e-6
+    patience: 10
+    
+  # 训练参数
+  batch_size: 32
+  num_epochs: 50
+  early_stopping_patience: 20
+  gradient_clipping: 1.0
+  accumulate_grad_batches: 1
+  
+  # 损失函数配置
+  loss:
+    type: "bcewithlogitsloss"
+    weight_positive: 1.0
+    weight_negative: 1.0
+    
+  # 评估指标
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "roc_auc"
+    - "pr_auc"
+
+# 性能优化配置
+performance:
+  # 缓存配置
+  caching:
+    enabled: true
+    cache_type: "memory"
+    max_cache_size: 1000000000  # 1GB
+    cache_dir: "cache"
+    
+  # 批处理配置
+  batch_processing:
+    dynamic_batching: true
+    max_batch_size: 64
+    batch_padding_strategy: "longest"
+    
+  # 图采样配置
+  graph_sampling:
+    enabled: true
+    num_neighbors: [20, 10]
+    replace: false
+
+# 评估配置
+evaluation:
+  batch_size: 64
+  metrics: ["accuracy", "precision", "recall", "f1", "roc_auc", "pr_auc"]
+  plot_roc_curve: true
+  plot_pr_curve: true
+  save_predictions: true
+  
+# 部署配置
+deployment:
+  model_path: "checkpoints/best_model.pt"
+  api_host: "0.0.0.0"
+  api_port: 8000
+  workers: 4
+  timeout: 60

@@ -1,0 +1,97 @@
+# 数据配置文件
+# 包含数据集和预处理设置
+
+# 数据集配置
+dataset:
+  # 数据集名称 (string, hippie, shs27k, shs148k)
+  name: "shs27k"
+  train_file: "data/shs27k_llapa/processed/random_train.tsv"
+  val_file: "data/shs27k_llapa/processed/random_val.tsv"
+  test_file: "data/shs27k_llapa/processed/random_test.tsv"
+  protein_info_file: "protein_info.csv"
+  
+  # SHS27k 数据集特定配置
+  shs27k:
+    url: "https://github.com/luoyunan/DNN-PPI/raw/master/dataset/yeast/SHS27k"
+    raw_file: "SHS27k.csv"
+    processed_file: "shs27k_processed.tsv"
+    download_timeout: 30
+
+  shs148k:
+    raw_file: "SHS148k.csv"
+    processed_dir: "data/shs148k_llapa/processed"
+    
+  # 关系类型映射
+  relation_types:
+    - "activation"
+    - "binding"
+    - "catalysis"
+    - "expression"
+    - "inhibition"
+    - "ptmod"
+    - "reaction"
+  
+  # 数据统计 (SHS27k 数据集)
+  num_relations: 7
+  num_proteins: 27000  # 估计值
+  num_interactions: 27000
+
+# 预处理配置
+preprocessing:
+  # 蛋白质序列处理
+  sequence:
+    max_length: 512  # SHS27k 序列较短，可以设置更小的值
+    padding_strategy: "max_length"
+    truncation: true
+    tokenizer_name: "facebook/esm2_t6_8M_UR50D"  # SHS27k 可以使用较小的ESM模型
+    use_esm_embeddings: true
+    
+  # 图构建参数
+  graph:
+    num_neighbors: 8  # SHS27k 数据集较小，可以减少邻居数量
+    max_path_length: 4  # 减少路径长度以提高效率
+    use_blast: false
+    blast_evalue: 1e-5
+    blast_num_alignments: 10
+    use_clusters: false
+    cluster_threshold: 0.7
+    
+  # 数据增强
+  augmentation:
+    enable: true
+    methods: ["random_flip"]  # SHS27k 较小，减少增强方法
+    flip_probability: 0.5
+    rotation_range: 15
+    jitter_std: 0.1
+    
+  # 特征提取
+  feature_extraction:
+    use_esm2: true
+    esm_model: "facebook/esm2_t6_8M_UR50D"  # SHS27k 可以使用较小的ESM模型
+    use_blast_features: false
+    use_ppi_network_features: true
+    use_go_features: false  # SHS27k 可能没有GO注释
+
+# 数据加载配置
+data_loader:
+  batch_size: 128  # SHS27k 可以使用更大的batch size
+  num_workers: 4  # 减少工作线程以节省资源
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 2
+  shuffle: true
+  drop_last: false
+  
+# 数据缓存配置
+caching:
+  use_cache: true
+  cache_dir: "artifacts/cache/shs27k"
+  cache_format: "torch"
+  invalidate_cache: false
+
+# 过滤设置
+filtering:
+  min_ppi_count: 1  # SHS27k 数据集较小，减少过滤阈值
+  max_ppi_count: 1000
+  filter_unbalanced_classes: false
+  class_balance_threshold: 0.1

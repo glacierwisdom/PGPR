@@ -1,0 +1,34 @@
+# 验证训练配置文件
+training:
+  batch_size: 2
+  epochs: 1
+  early_stopping_patience: 3
+  checkpoint_dir: "checkpoints/verify"
+  best_model_metric: "f1_score"
+  best_model_mode: "max"
+  quick_run_epochs: 1
+  quick_run_steps: 5
+  validation:
+    val_batch_size: 2
+    val_interval: 1
+
+optimizer:
+  type: "adamw"
+  lr: 1e-5
+
+loss:
+  type: "bce"
+
+callbacks:
+  model_checkpoint: true
+  early_stopping: false
+  tensorboard_logger: false
+  lr_scheduler: false
+  progress_bar: true
+
+distributed:
+  use_distributed: false
+
+amp:
+  use_amp: true
+  dtype: "float16"
